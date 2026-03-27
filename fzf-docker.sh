@@ -103,7 +103,7 @@ _fzf_docker_containers() {
   _fzf_docker_fzf --ansi \
     --border-label '🐳 Containers ' \
     --header-lines 2 \
-    --preview "docker inspect --format '{{json .}}' {1} 2>/dev/null | python3 -m json.tool 2>/dev/null || docker inspect {1}" \
+    --preview "docker inspect {1} 2>/dev/null" \
     --bind "alt-a:change-border-label(🐳 All containers)+reload:bash \"$__fzf_docker\" --list all-containers" \
     --bind "alt-l:execute:docker logs --tail 200 --timestamps {1} 2>&1 | $(__fzf_docker_pager)" \
     "$@" |
@@ -116,7 +116,7 @@ _fzf_docker_images() {
   _fzf_docker_fzf --ansi \
     --border-label '📦 Images ' \
     --header-lines 2 \
-    --preview "docker history --no-trunc {1} 2>/dev/null; echo '---'; docker inspect --format '{{json .}}' {1} 2>/dev/null | python3 -m json.tool 2>/dev/null || docker inspect {1}" \
+    --preview "docker history --no-trunc {1} 2>/dev/null; echo '---'; docker inspect {1} 2>/dev/null" \
     --bind "alt-h:preview:docker history {1} 2>/dev/null" \
     "$@" |
   awk '{print $1}'
@@ -128,7 +128,7 @@ _fzf_docker_volumes() {
   _fzf_docker_fzf --ansi \
     --border-label '💾 Volumes ' \
     --header-lines 1 \
-    --preview "docker volume inspect {1} 2>/dev/null | python3 -m json.tool 2>/dev/null || docker volume inspect {1}" \
+    --preview "docker volume inspect {1} 2>/dev/null" \
     "$@" |
   awk '{print $1}'
 }
@@ -139,7 +139,7 @@ _fzf_docker_networks() {
   _fzf_docker_fzf --ansi \
     --border-label '🌐 Networks ' \
     --header-lines 1 \
-    --preview "docker network inspect {2} 2>/dev/null | python3 -m json.tool 2>/dev/null || docker network inspect {2}" \
+    --preview "docker network inspect {2} 2>/dev/null" \
     "$@" |
   awk '{print $1}'
 }
