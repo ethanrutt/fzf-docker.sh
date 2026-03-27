@@ -7,7 +7,7 @@
 #   source fzf-docker.sh
 #
 # Keybindings (CTRL-O prefix):
-#   CTRL-O CTRL-C  Containers
+#   CTRL-O CTRL-T  Containers
 #   CTRL-O CTRL-I  Images
 #   CTRL-O CTRL-V  Volumes
 #   CTRL-O CTRL-N  Networks
@@ -195,7 +195,7 @@ _fzf_docker_list_bindings() {
   cat <<'EOF'
 
 CTRL-O ? to show this list
-CTRL-O CTRL-C for Containers
+CTRL-O CTRL-T for Containers
 CTRL-O CTRL-I for Images
 CTRL-O CTRL-V for Volumes
 CTRL-O CTRL-N for Networks
@@ -275,7 +275,7 @@ fi
 
 # key:function pairs — key is the letter after CTRL-O
 __fzf_docker_init \
-  c:containers \
+  t:containers \
   i:images \
   v:volumes \
   n:networks \
