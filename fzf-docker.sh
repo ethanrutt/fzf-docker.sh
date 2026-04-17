@@ -11,8 +11,6 @@
 #   CTRL-O CTRL-I  Images
 #   CTRL-O CTRL-V  Volumes
 #   CTRL-O CTRL-N  Networks
-#   CTRL-O CTRL-L  Logs (running containers)
-#   CTRL-O CTRL-P  comPose services
 #   CTRL-O ?       List bindings
 
 # shellcheck disable=SC2039
@@ -54,18 +52,6 @@ if [[ $1 == --list ]]; then
       networks)
         docker network ls --format 'table {{.ID}}\t{{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null
         ;;
-      logs)
-        echo 'Select a running container to view logs'
-        docker ps --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}' 2>/dev/null
-        ;;
-      compose)
-        echo 'ALT-L (logs)'
-        docker compose ls 2>/dev/null
-        ;;
-      compose-services)
-        echo 'ALT-L (logs)'
-        docker compose -p "$2" ps --format 'table {{.ID}}\t{{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null
-        ;;
       *) exit 1 ;;
     esac
   fi
@@ -103,7 +89,7 @@ _fzf_docker_containers() {
   _fzf_docker_fzf --ansi \
     --border-label '🐳 Containers ' \
     --header-lines 2 \
-    --preview "docker inspect {1} 2>/dev/null" \
+    --preview "docker logs --tail 50 --timestamps {1} 2>&1" \
     --bind "alt-a:change-border-label(🐳 All containers)+reload:bash \"$__fzf_docker\" --list all-containers" \
     --bind "alt-l:execute:docker logs --tail 200 --timestamps {1} 2>&1 | $(__fzf_docker_pager)" \
     "$@" |
@@ -144,53 +130,6 @@ _fzf_docker_networks() {
   awk '{print $1}'
 }
 
-_fzf_docker_logs() {
-  _fzf_docker_check || return
-  bash "$__fzf_docker" --list logs |
-  _fzf_docker_fzf --ansi \
-    --border-label '📜 Logs ' \
-    --header-lines 2 \
-    --preview "docker logs --tail 50 --timestamps {1} 2>&1" \
-    --bind "alt-l:execute:docker logs --tail 500 --timestamps -f {1} 2>&1 | $(__fzf_docker_pager)" \
-    "$@" |
-  awk '{print $1}'
-}
-
-_fzf_docker_services() {
-  _fzf_docker_check || return
-
-  # Check if compose is available
-  if ! docker compose version > /dev/null 2>&1; then
-    [[ -n $TMUX ]] && tmux display-message "Docker Compose is not available"
-    return 1
-  fi
-
-  # First: pick a compose project
-  local project
-  project=$(
-    bash "$__fzf_docker" --list compose |
-    _fzf_docker_fzf --ansi \
-      --border-label '🐙 Compose projects ' \
-      --header-lines 2 \
-      --no-multi \
-      --preview "docker compose -p {1} ps --format 'table {{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null" \
-      "$@" |
-    awk '{print $1}'
-  )
-
-  [[ -z $project ]] && return
-
-  # Second: pick services within that project, output container ID
-  bash "$__fzf_docker" --list compose-services "$project" |
-  _fzf_docker_fzf --ansi \
-    --border-label "🐙 Compose: $project " \
-    --header-lines 2 \
-    --preview "docker logs --tail 50 --timestamps {1} 2>&1" \
-    --bind "alt-l:execute:docker compose -p '$project' logs --tail 200 --timestamps -f {3} 2>&1 | $(__fzf_docker_pager)" \
-    "$@" |
-  awk '{print $1}'
-}
-
 _fzf_docker_list_bindings() {
   cat <<'EOF'
 
@@ -199,8 +138,6 @@ CTRL-O CTRL-T for Containers
 CTRL-O CTRL-I for Images
 CTRL-O CTRL-V for Volumes
 CTRL-O CTRL-N for Networks
-CTRL-O CTRL-L for Logs (running containers)
-CTRL-O CTRL-P for comPose services
 EOF
 }
 
@@ -279,8 +216,6 @@ __fzf_docker_init \
   i:images \
   v:volumes \
   n:networks \
-  l:logs \
-  p:services \
   '?list_bindings'
 
 fi # --------------------------------------------------------------------------
