@@ -4,6 +4,9 @@ Heavily inspired by [fzf-git.sh](https://github.com/junegunn/fzf-git.sh)
 
 bash and zsh key bindings for docker objects, powered by [fzf](https://github.com/junegunn/fzf).
 
+<img width="2500" height="1395" alt="image" src="https://github.com/user-attachments/assets/65c93f37-92ab-42e5-9fda-3eb6a4ea27c9" />
+
+
 ## Installation
 
 1. clone
