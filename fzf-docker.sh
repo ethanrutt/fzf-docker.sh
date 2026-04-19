@@ -36,19 +36,20 @@ if [[ $1 == --list ]]; then
     case "$1" in
       containers)
         echo 'ALT-A (show all, including stopped)'
-        docker ps --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null
+        docker ps --format 'table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.CreatedAt}}'
         ;;
       all-containers)
-        docker ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null
+        echo '(including stopped)'
+        docker ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.CreatedAt}}'
         ;;
       images)
-        docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}' 2>/dev/null
+        docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}'
         ;;
       volumes)
-        docker volume ls --format 'table {{.Name}}\t{{.Driver}}\t{{.Mountpoint}}' 2>/dev/null
+        docker volume ls --format 'table {{.Name}}\t{{.Driver}}\t{{.Mountpoint}}'
         ;;
       networks)
-        docker network ls --format 'table {{.ID}}\t{{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null
+        docker network ls --format 'table {{.ID}}\t{{.Name}}\t{{.Driver}}\t{{.Scope}}'
         ;;
       *) exit 1 ;;
     esac
@@ -87,7 +88,7 @@ _fzf_docker_containers() {
   _fzf_docker_fzf --ansi \
     --border-label '🐳 Containers ' \
     --header-lines 2 \
-    --preview "docker logs --tail 50 --timestamps {1} 2>&1" \
+    --preview "docker logs --tail 20 {1}" \
     --bind "alt-a:change-border-label(🐳 All containers)+reload:bash \"$__fzf_docker\" --list all-containers" \
     "$@" |
   awk '{print $1}'
@@ -99,7 +100,7 @@ _fzf_docker_images() {
   _fzf_docker_fzf --ansi \
     --border-label '📦 Images ' \
     --header-lines 1 \
-    --preview "docker history --no-trunc {1} 2>/dev/null; echo '---'; docker inspect {1} 2>/dev/null" \
+    --preview "docker history --no-trunc {1}" \
     "$@" |
   awk '{print $1}'
 }
@@ -121,7 +122,7 @@ _fzf_docker_networks() {
   _fzf_docker_fzf --ansi \
     --border-label '🌐 Networks ' \
     --header-lines 1 \
-    --preview "docker network inspect {2} 2>/dev/null" \
+    --preview "docker ps --filter network={1} --format 'table {{.Image}}\t{{.Names}}\t{{.ID}}'" \
     "$@" |
   awk '{print $1}'
 }
