@@ -35,15 +35,13 @@ if [[ $1 == --list ]]; then
   if [[ $# -ge 1 ]]; then
     case "$1" in
       containers)
-        echo 'ALT-L (logs) ╱ ALT-A (show all, including stopped)'
+        echo 'ALT-A (show all, including stopped)'
         docker ps --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null
         ;;
       all-containers)
-        echo 'ALT-L (logs)'
         docker ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null
         ;;
       images)
-        echo 'ALT-H (history)'
         docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}' 2>/dev/null
         ;;
       volumes)
@@ -91,7 +89,6 @@ _fzf_docker_containers() {
     --header-lines 2 \
     --preview "docker logs --tail 50 --timestamps {1} 2>&1" \
     --bind "alt-a:change-border-label(🐳 All containers)+reload:bash \"$__fzf_docker\" --list all-containers" \
-    --bind "alt-l:execute:docker logs --tail 200 --timestamps {1} 2>&1 | $(__fzf_docker_pager)" \
     "$@" |
   awk '{print $1}'
 }
@@ -101,9 +98,8 @@ _fzf_docker_images() {
   bash "$__fzf_docker" --list images |
   _fzf_docker_fzf --ansi \
     --border-label '📦 Images ' \
-    --header-lines 2 \
+    --header-lines 1 \
     --preview "docker history --no-trunc {1} 2>/dev/null; echo '---'; docker inspect {1} 2>/dev/null" \
-    --bind "alt-h:preview:docker history {1} 2>/dev/null" \
     "$@" |
   awk '{print $1}'
 }
