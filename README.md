@@ -34,3 +34,12 @@ git clone https://github.com/ethanrutt/fzf-docker.sh.git "$HOME/.fzf-docker"
 > [!WARNING]
 > in bash, <kbd>CTRL-O</kbd> executes the last command in your history. If you
 > use that binding, you will lose it with this program
+
+## Dev
+
+comment out source line in `.bashrc`
+
+```sh
+exec bash
+source fzf-docker.sh
+```
